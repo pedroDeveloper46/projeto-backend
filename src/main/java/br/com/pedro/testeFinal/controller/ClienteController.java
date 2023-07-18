@@ -1,5 +1,6 @@
 package br.com.pedro.testeFinal.controller;
 
+import java.lang.ProcessBuilder.Redirect;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -23,6 +24,7 @@ import br.com.pedro.testeFinal.dto.ClienteDto;
 import br.com.pedro.testeFinal.dto.EmprestimoRequestDto;
 import br.com.pedro.testeFinal.dto.EmprestimoResponseDto;
 import br.com.pedro.testeFinal.exceptions.ClienteNotFoundException;
+import br.com.pedro.testeFinal.exceptions.EmprestimoNotFoundException;
 import br.com.pedro.testeFinal.model.Cliente;
 import br.com.pedro.testeFinal.model.Endereco;
 import br.com.pedro.testeFinal.service.ClienteService;
@@ -82,7 +84,7 @@ public class ClienteController {
 	
 	
 	@PostMapping("/{cpf}/emprestimos")
-	public EmprestimoResponseDto saveEmprestimo(@PathVariable String cpf, @RequestBody @Valid EmprestimoRequestDto emprestimoRequestDto, Errors erros) throws ClienteNotFoundException {
+	public EmprestimoResponseDto salvaEmprestimo(@PathVariable String cpf, @RequestBody @Valid EmprestimoRequestDto emprestimoRequestDto, Errors erros) throws ClienteNotFoundException {
 		
 		if (erros.hasErrors()) {
 			throw new ValidationException("Erro de validação:" +erros.getFieldError().getDefaultMessage());
@@ -91,6 +93,36 @@ public class ClienteController {
 		return emprestimoService.salvaEmprestimo(emprestimoRequestDto, cpf);
 		
 	}
+	
+	//Os endpoints abaixo foram desenvolvidos após a entrega
+	
+	@GetMapping("/{cpf}/emprestimos")
+	public List<EmprestimoResponseDto> listaTodosEmprestimoDoCliente(@PathVariable String cpf) throws ClienteNotFoundException{
+		return emprestimoService.buscaEmprestimosDoCliente(cpf);
+	}
+	
+	@GetMapping("/{cpf}/emprestimos/deletar/{id}")
+	@ResponseStatus(HttpStatus.OK)
+	public String deletarEmprestimo(@PathVariable Long id) throws EmprestimoNotFoundException {
+		try {
+			 emprestimoService.deletarEmprestimo(id);
+			 return "Emprestimo Excluído com sucesso!!";
+		} catch (Exception e) {
+			throw new EmprestimoNotFoundException(id);
+		}
+	}
+	
+	@GetMapping("/{cpf}/emprestimos/{id}")
+	public EmprestimoResponseDto buscaEmprestimo(@PathVariable Long id, @PathVariable String cpf) throws EmprestimoNotFoundException {
+		
+		try {
+			return emprestimoService.buscaEmprestimo(id);
+		} catch (Exception e) {
+			throw new EmprestimoNotFoundException(id);
+		}
+	}
+	
+	
 	
 	
 	

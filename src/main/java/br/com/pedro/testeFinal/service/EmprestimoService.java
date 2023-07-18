@@ -16,6 +16,7 @@ import br.com.pedro.testeFinal.dto.EmprestimoRequestDto;
 import br.com.pedro.testeFinal.dto.EmprestimoResponseDto;
 import br.com.pedro.testeFinal.enums.Relacionamento;
 import br.com.pedro.testeFinal.exceptions.ClienteNotFoundException;
+import br.com.pedro.testeFinal.exceptions.EmprestimoNotFoundException;
 import br.com.pedro.testeFinal.model.Cliente;
 import br.com.pedro.testeFinal.model.Emprestimo;
 import br.com.pedro.testeFinal.repository.ClienteRepository;
@@ -80,6 +81,22 @@ public class EmprestimoService {
 		
 	}
 	
+	public void deletarEmprestimo(Long id) throws EmprestimoNotFoundException {
+		
+		Emprestimo emprestimo = convertDto.toEmprestimo(buscaEmprestimo(id));
+		
+		emprestimoRepository.delete(emprestimo);
+		
+	}
+	
+	public EmprestimoResponseDto buscaEmprestimo(Long id) {
+		
+		Emprestimo emprestimo = emprestimoRepository.findById(id).orElseThrow();
+		
+		return convertDto.toEmprestimoResponseDto(emprestimo);
+		
+	}
+	
 	public boolean verificaPossibilidadeEmprestimo(Cliente cliente) {
 		
 		BigDecimal somaEmprestimos = somaEmprestimos(cliente.getCpf());
@@ -100,6 +117,24 @@ public class EmprestimoService {
 		
 		return new BigDecimal(soma);
 		
+		
+	}
+	
+	public List<EmprestimoResponseDto> buscaEmprestimosDoCliente(String cpf) throws ClienteNotFoundException{
+		
+		Cliente cliente = buscaClientePeloCpf(cpf);
+		
+		if (cliente == null) {
+			throw new ClienteNotFoundException(cpf);
+		}
+		
+		List<Emprestimo> emprestimos = emprestimoRepository.findByCliente_Cpf(cpf);
+		
+		if (emprestimos.size() == 0) {
+			throw new ValidationException("O Cliente do CPF " + cpf + " ainda não pediu nenhum emprestimo");
+		}
+		
+		return convertDto.toListEmprestimoResponseDto(emprestimos);
 		
 	}
 	

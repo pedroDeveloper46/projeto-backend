@@ -35,6 +35,18 @@ public class ConvertDto {
 		return modelMapper.map(emprestimo, Emprestimo.class);
 	}
 	
+	public Emprestimo toEmprestimo(EmprestimoResponseDto emprestimo) {
+		return modelMapper.map(emprestimo, Emprestimo.class);
+	}
+	
+	public List<EmprestimoResponseDto> toListEmprestimoResponseDto(List<Emprestimo> emprestimos) {
+		
+		return emprestimos.stream()
+				          .map(e -> modelMapper.map(e, EmprestimoResponseDto.class))
+				          .toList();
+		
+	}
+	
 	
 	
 	
